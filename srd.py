@@ -1,55 +1,82 @@
-#тут возможно лишние импорты
-#да и дальше будет много говнокода
-import time
-import numpy as np
-import pyscreenshot as ImageGrab
-import cv2
-import os
-import pytesseract
+from openpyxl import Workbook
+import openpyxl
+import xlrd
 import xlwt
-from xlwt import Workbook 
 import datetime
-import xlwt, xlrd
-from xlutils.copy import copy as xlcopy
+import cv2
+import pytesseract
+import re
 
-#Распознавание текста на фотке
-#img = cv2.imread('che.jpeg')
-#text = pytesseract.image_to_string(img, lang="rus")
-#f = open('ch.txt','w')
-#f.write(text)
-#f.close()
-#print(text)
 
-#тут получение даты для записи в таблицу, плюс сохранение инфы с чека в тхт(были идеи, что с его будет проще в ексель вводить данные)
-a = datetime.datetime.today().strftime("%d-%m-%Y")
-#with open('ch.txt', 'r') as f:
-#    ch = f.read().splitlines()
-#print(ch)
 
-#А тут начинается работа с екселем
-wb = Workbook()
-sheet1 = wb.add_sheet('Sheet 1')
 
-sheet1.write(0, 0, 'Date')
-sheet1.write(0, 1, 'Product')
-sheet1.write(0, 2, 'Price')
+img = cv2.imread('chech.jpg')
+text = pytesseract.image_to_string(img, lang="rus")
+f = open('ch.txt','w')
+f.write(text)
+f.close()
+read_photo = text
 
-tim = sheet1.write(1, 0, a)
-sheet1.write(1, 1, 'Coffee')
-sheet1.write(1, 2, '2 $')
+txt_number = len(open('ch.txt', 'r').readlines())
+division = (txt_number//2)
 
-wb.save('info.xls') 
-#пока что при каждом запуске кода таблица создается заново, потом сделаю чтоб просто открывало существующую
+while True:
+	index_number = 0
+	index = index_number + 1
+	print (index)
+	regular_index = re.findall(r"[=]\d.\d", read_photo)
+	print(regular_index[index_number])
+	if index_number == division:
+		print('End')
+		beak
 
-read_book = xlrd.open_workbook('info.xls', on_demand=True)
-rbook = read_book.get_sheet(0)
+#разбивка текста 
 
-cells = rbook.row_slice(rowx=1, end_colx=2)
-for cell in cells:
-    en = (cell.value)
-    print(en)
 
-#if en == 'Date':
-#	print('[+]')
-#else:
-#	print('[-]')
+
+#открытие файла
+dest_filename = 'empty_book.xlsx'
+wb=openpyxl.load_workbook(dest_filename)
+sheet=wb['Pi']
+
+#запись инфы в первую ячейку Date
+row_number = 1 
+while True:
+	row_number += 1
+	column_value = sheet.cell(row=row_number, column=1).value
+	if column_value == None:
+		print("Свободная первая ячейка --", row_number)
+		break
+
+date_info = datetime.datetime.now()
+row_update = str(row_number)
+sheet['A'+row_update] = date_info
+
+
+#запись инфы в вторую ячейку Product name
+row_number = 1 
+while True:
+	row_number += 1
+	column_value = sheet.cell(row=row_number, column=2).value
+	if column_value == None:
+		print("Свободная вторая ячейка --", row_number)
+		break
+
+product_name = ('Milk')
+sheet['B'+row_update] = product_name
+
+
+#запись инфы в третью ячейку Price
+row_number = 1 
+while True:
+	row_number += 1
+	column_value = sheet.cell(row=row_number, column=2).value
+	if column_value == None:
+		print("Свободная третья ячейка --", row_number)
+		break
+
+price = ('3$')
+sheet['C'+row_update] = price
+
+
+wb.save(filename = dest_filename) 
